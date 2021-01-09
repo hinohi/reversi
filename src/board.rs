@@ -30,4 +30,9 @@ impl Side {
 
 pub trait Board: Display + Clone + Eq {
     fn put(&mut self, col: usize, row: usize, side: Side);
+
+    fn list_candidates(&self, side: Side) -> Vec<(usize, usize)>;
+
+    /// Calculate the number of black, white
+    fn count(&self) -> (u8, u8);
 }

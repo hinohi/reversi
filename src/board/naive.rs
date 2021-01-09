@@ -38,7 +38,7 @@ impl NaiveBoard {
         NaiveBoard { board }
     }
 
-    fn check_one_dir<I>(&mut self, side: Side, iter: I) -> usize
+    fn check_one_dir<I>(&self, side: Side, iter: I) -> usize
     where
         I: Iterator<Item = (usize, usize)>,
     {
@@ -52,21 +52,39 @@ impl NaiveBoard {
         }
         0
     }
+
+    fn can_put(&self, col: usize, row: usize, side: Side) -> bool {
+        if self.check_one_dir(side, (col + 1..SIZE).zip(Repeat(row))) > 0 {
+            return true;
+        }
+        if self.check_one_dir(side, (0..col).rev().zip(Repeat(row))) > 0 {
+            return true;
+        }
+        if self.check_one_dir(side, Repeat(col).zip(row + 1..SIZE)) > 0 {
+            return true;
+        }
+        if self.check_one_dir(side, Repeat(col).zip((0..row).rev())) > 0 {
+            return true;
+        }
+        if self.check_one_dir(side, (col + 1..SIZE).zip(row + 1..SIZE)) > 0 {
+            return true;
+        }
+        if self.check_one_dir(side, (col + 1..SIZE).zip((0..row).rev())) > 0 {
+            return true;
+        }
+        if self.check_one_dir(side, (0..col).rev().zip(row + 1..SIZE)) > 0 {
+            return true;
+        }
+        if self.check_one_dir(side, (0..col).rev().zip((0..row).rev())) > 0 {
+            return true;
+        }
+        false
+    }
 }
 
 impl Board for NaiveBoard {
     fn put(&mut self, col: usize, row: usize, side: Side) {
         self.board[row][col] = Cell::Occupied(side);
-        // col±0 row+1
-        let count = self.check_one_dir(side, Repeat(col).zip(row + 1..SIZE));
-        for r in row + 1..=row + count {
-            self.board[r][col] = Cell::Occupied(side);
-        }
-        // col±0 row-1
-        let count = self.check_one_dir(side, Repeat(col).zip((0..row).rev()));
-        for r in row - count..row {
-            self.board[r][col] = Cell::Occupied(side);
-        }
         // col+1 row±0
         let count = self.check_one_dir(side, (col + 1..SIZE).zip(Repeat(row)));
         for c in col + 1..=col + count {
@@ -76,6 +94,16 @@ impl Board for NaiveBoard {
         let count = self.check_one_dir(side, (0..col).rev().zip(Repeat(row)));
         for c in col - count..col {
             self.board[row][c] = Cell::Occupied(side);
+        }
+        // col±0 row+1
+        let count = self.check_one_dir(side, Repeat(col).zip(row + 1..SIZE));
+        for r in row + 1..=row + count {
+            self.board[r][col] = Cell::Occupied(side);
+        }
+        // col±0 row-1
+        let count = self.check_one_dir(side, Repeat(col).zip((0..row).rev()));
+        for r in row - count..row {
+            self.board[r][col] = Cell::Occupied(side);
         }
         // col+1 row+1
         let count = self.check_one_dir(side, (col + 1..SIZE).zip(row + 1..SIZE));
@@ -97,6 +125,33 @@ impl Board for NaiveBoard {
         for (c, r) in (col - count..col).zip(row - count..row) {
             self.board[r][c] = Cell::Occupied(side);
         }
+    }
+
+    fn list_candidates(&self, side: Side) -> Vec<(usize, usize)> {
+        let mut v = Vec::new();
+        for (i, row) in self.board.iter().enumerate() {
+            for (j, &c) in row.iter().enumerate() {
+                if c == Cell::Vacant && self.can_put(j, i, side) {
+                    v.push((j, i))
+                }
+            }
+        }
+        v
+    }
+
+    fn count(&self) -> (u8, u8) {
+        let mut black = 0;
+        let mut white = 0;
+        for row in self.board.iter() {
+            for c in row.iter() {
+                match c {
+                    Cell::Occupied(Side::Black) => black += 1,
+                    Cell::Occupied(Side::White) => white += 1,
+                    Cell::Vacant => (),
+                }
+            }
+        }
+        (black, white)
     }
 }
 
