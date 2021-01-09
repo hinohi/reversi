@@ -4,13 +4,17 @@ use std::{
     path::Path,
 };
 
-use reversi::{Board, Side};
+use reversi::{naive::NaiveBoard, Board, Side};
 
-fn replay_scenario<P: AsRef<Path>>(scenario: P, mut board: Board) {
+fn replay_scenario<P, B>(scenario: P, mut board: B)
+where
+    P: AsRef<Path>,
+    B: Board,
+{
     let mut scenario =
         BufReader::new(File::open(scenario).expect("scenario file expected")).lines();
 
-    fn compare(scenario: &mut impl Iterator<Item = io::Result<String>>, board: &Board) {
+    fn compare<B: Board>(scenario: &mut impl Iterator<Item = io::Result<String>>, board: &B) {
         let mut expect = String::with_capacity(9 * 8);
         for _ in 0..8 {
             expect.push_str(&scenario.next().unwrap().unwrap());
@@ -43,6 +47,6 @@ fn replay_scenario<P: AsRef<Path>>(scenario: P, mut board: Board) {
 }
 
 #[test]
-fn replay001() {
-    replay_scenario("tests/board_cases/001.txt", Board::default());
+fn replay001_naive() {
+    replay_scenario("tests/board_cases/001.txt", NaiveBoard::default());
 }
