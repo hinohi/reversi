@@ -28,9 +28,9 @@ impl Enum1dBoard {
         let mut count = 0;
         loop {
             p += d;
-            match self.board[p as usize] {
+            match unsafe { self.board.get_unchecked(p as usize) } {
                 Cell::Vacant => break 0,
-                Cell::Occupied(s) if s == side => break count,
+                Cell::Occupied(s) if *s == side => break count,
                 Cell::Occupied(_) => count += 1,
             }
         }
@@ -39,7 +39,9 @@ impl Enum1dBoard {
     fn put_one_dir(&mut self, side: Side, mut p: isize, d: isize, count: usize) {
         for _ in 0..count {
             p += d;
-            self.board[p as usize] = Cell::Occupied(side);
+            unsafe {
+                *self.board.get_unchecked_mut(p as usize) = Cell::Occupied(side);
+            };
         }
     }
 
@@ -67,7 +69,8 @@ impl Board for Enum1dBoard {
         for row in 1..L - 1 {
             for col in 1..L - 1 {
                 let p = row * L + col;
-                if self.board[p] == Cell::Vacant && self.can_put(side, p as isize) {
+                let c = unsafe { self.board.get_unchecked(p) };
+                if *c == Cell::Vacant && self.can_put(side, p as isize) {
                     v.push((col - 1, row - 1));
                 }
             }
