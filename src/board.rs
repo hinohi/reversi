@@ -30,7 +30,7 @@ impl Side {
 
 pub type Count = u8;
 
-pub trait Board: Display + FromStr + Clone {
+pub trait Board: Display + FromStr + Clone + Default {
     fn put(&mut self, col: usize, row: usize, side: Side);
 
     fn list_candidates(&self, side: Side) -> Vec<(usize, usize)>;

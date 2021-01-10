@@ -1,5 +1,6 @@
 mod board;
-mod search;
+mod game;
+pub mod search;
 
 pub use board::*;
-pub use search::*;
+pub use game::*;

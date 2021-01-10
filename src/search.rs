@@ -1,4 +1,19 @@
+mod random;
+
 use crate::{Board, Count, Side, SIZE};
+pub use random::*;
+
+pub type Occupied = u8;
+
+pub trait Search {
+    type Board: Board;
+    fn search(
+        &mut self,
+        board: &Self::Board,
+        occupied: Occupied,
+        candidates: &[(usize, usize)],
+    ) -> usize;
+}
 
 pub type Turn = u8;
 
