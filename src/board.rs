@@ -1,6 +1,6 @@
 use std::{fmt::Display, str::FromStr};
 
-pub mod naive;
+pub mod enum2d;
 
 pub const SIZE: usize = 8;
 

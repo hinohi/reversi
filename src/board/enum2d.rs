@@ -41,19 +41,19 @@ impl TryFrom<char> for Cell {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct NaiveBoard {
+pub struct Enum2dBoard {
     board: [[Cell; SIZE]; SIZE],
 }
 
-impl NaiveBoard {
-    pub const fn new() -> NaiveBoard {
+impl Enum2dBoard {
+    pub const fn new() -> Enum2dBoard {
         let mut board = [[Cell::Vacant; SIZE]; SIZE];
         let c = SIZE / 2 - 1;
         board[c][c] = Cell::Occupied(Side::White);
         board[c + 1][c] = Cell::Occupied(Side::Black);
         board[c][c + 1] = Cell::Occupied(Side::Black);
         board[c + 1][c + 1] = Cell::Occupied(Side::White);
-        NaiveBoard { board }
+        Enum2dBoard { board }
     }
 
     fn check_one_dir<I>(&self, side: Side, iter: I) -> usize
@@ -100,7 +100,7 @@ impl NaiveBoard {
     }
 }
 
-impl Board for NaiveBoard {
+impl Board for Enum2dBoard {
     fn put(&mut self, col: usize, row: usize, side: Side) {
         self.board[row][col] = Cell::Occupied(side);
         // col+1 row±0
@@ -173,13 +173,13 @@ impl Board for NaiveBoard {
     }
 }
 
-impl Default for NaiveBoard {
-    fn default() -> NaiveBoard {
-        NaiveBoard::new()
+impl Default for Enum2dBoard {
+    fn default() -> Enum2dBoard {
+        Enum2dBoard::new()
     }
 }
 
-impl std::fmt::Display for NaiveBoard {
+impl std::fmt::Display for Enum2dBoard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use std::fmt::Write;
         for row in self.board.iter() {
@@ -192,7 +192,7 @@ impl std::fmt::Display for NaiveBoard {
     }
 }
 
-impl FromStr for NaiveBoard {
+impl FromStr for Enum2dBoard {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut chars = s.chars();
@@ -206,7 +206,7 @@ impl FromStr for NaiveBoard {
                 _ => return Err(()),
             }
         }
-        Ok(NaiveBoard { board })
+        Ok(Enum2dBoard { board })
     }
 }
 
@@ -226,7 +226,7 @@ mod tests {
 
     #[test]
     fn from_str() {
-        let mut expect = NaiveBoard::default();
+        let mut expect = Enum2dBoard::default();
         expect.put(2, 3, Side::Black);
         let s = r"________
 ________

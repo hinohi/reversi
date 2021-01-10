@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use reversi::{naive::NaiveBoard, Board, Side};
+use reversi::{enum2d::Enum2dBoard, Board, Side};
 
 fn replay_scenario<P, B>(scenario: P, mut board: B)
 where
@@ -92,5 +92,5 @@ where
 
 #[test]
 fn replay001_naive() {
-    replay_scenario("tests/board_cases/001.txt", NaiveBoard::default());
+    replay_scenario("tests/board_cases/001.txt", Enum2dBoard::default());
 }

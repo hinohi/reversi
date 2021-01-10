@@ -9,3 +9,10 @@ edition = "2018"
 [dependencies]
 rand = "*"
 rand_pcg = "*"
+
+[dev-dependencies]
+criterion = "*"
+
+[[bench]]
+name = "board"
+harness = false
