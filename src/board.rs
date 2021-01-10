@@ -1,5 +1,6 @@
 use std::{convert::TryFrom, fmt::Display, str::FromStr};
 
+pub mod bit;
 pub mod enum1d;
 pub mod enum2d;
 

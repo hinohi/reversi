@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use reversi::{enum1d::Enum1dBoard, enum2d::Enum2dBoard, Board, Side};
+use reversi::{bit::BitBoard, enum1d::Enum1dBoard, enum2d::Enum2dBoard, Board, Side};
 
 fn replay_scenario<P, B>(scenario: P, mut board: B)
 where
@@ -98,4 +98,9 @@ fn replay001_enum2d() {
 #[test]
 fn replay001_enum1d() {
     replay_scenario("tests/board_cases/001.txt", Enum1dBoard::default());
+}
+
+#[test]
+fn replay001_bit() {
+    replay_scenario("tests/board_cases/001.txt", BitBoard::default());
 }
