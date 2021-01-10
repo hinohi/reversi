@@ -60,5 +60,27 @@ fn enum2d_full10(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, enum2d, enum1d, enum2d_full10);
+fn enum1d_full10(c: &mut Criterion) {
+    let mut rng = Mcg128Xsl64::new(1);
+    c.bench_function("enum1d_full10", |b| {
+        b.iter(|| {
+            let mut game = Game::new(
+                RandomFullSearch::<Enum1dBoard, _>::new(
+                    Side::Black,
+                    Mcg128Xsl64::from_rng(&mut rng).unwrap(),
+                    64 - 10,
+                ),
+                RandomFullSearch::<Enum1dBoard, _>::new(
+                    Side::White,
+                    Mcg128Xsl64::from_rng(&mut rng).unwrap(),
+                    64 - 10,
+                ),
+            );
+            let (b, w) = game.play_game();
+            assert!(b + w <= 64);
+        });
+    });
+}
+
+criterion_group!(benches, enum2d, enum1d, enum2d_full10, enum1d_full10);
 criterion_main!(benches);

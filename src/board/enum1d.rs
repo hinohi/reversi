@@ -37,7 +37,7 @@ impl Enum1dBoard {
     }
 
     fn put_one_dir(&mut self, side: Side, mut p: isize, d: isize, count: usize) {
-        for _ in 1..count {
+        for _ in 0..count {
             p += d;
             self.board[p as usize] = Cell::Occupied(side);
         }
@@ -68,7 +68,7 @@ impl Board for Enum1dBoard {
             for col in 1..L - 1 {
                 let p = row * L + col;
                 if self.board[p] == Cell::Vacant && self.can_put(side, p as isize) {
-                    v.push((col, row));
+                    v.push((col - 1, row - 1));
                 }
             }
         }
@@ -98,8 +98,8 @@ impl Default for Enum1dBoard {
 impl std::fmt::Display for Enum1dBoard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use std::fmt::Write;
-        for row in 1..=L {
-            for col in 1..=L {
+        for row in 1..L - 1 {
+            for col in 1..L - 1 {
                 self.board[row * L + col].fmt(f)?;
             }
             f.write_char('\n')?;
