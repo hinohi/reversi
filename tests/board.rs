@@ -104,3 +104,18 @@ fn replay001_enum1d() {
 fn replay001_bit() {
     replay_scenario("tests/board_cases/001.txt", BitBoard::default());
 }
+
+#[test]
+fn replay002_enum2d() {
+    replay_scenario("tests/board_cases/002.txt", Enum2dBoard::default());
+}
+
+#[test]
+fn replay002_enum1d() {
+    replay_scenario("tests/board_cases/002.txt", Enum1dBoard::default());
+}
+
+#[test]
+fn replay002_bit() {
+    replay_scenario("tests/board_cases/002.txt", BitBoard::default());
+}

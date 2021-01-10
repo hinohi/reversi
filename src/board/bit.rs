@@ -23,7 +23,7 @@ impl Default for BitBoard {
     }
 }
 
-pub fn can_put(mine: u64, opp: u64) -> u64 {
+fn can_put(mine: u64, opp: u64) -> u64 {
     let blank = !(mine | opp);
     let mut pos = 0;
     // 左右
@@ -63,7 +63,7 @@ pub fn can_put(mine: u64, opp: u64) -> u64 {
                 tmp |= watch & (tmp << shift);
             }
             pos |= blank & (tmp << shift);
-            let mut tmp = watch & watch & (mine >> shift);
+            let mut tmp = watch & (mine >> shift);
             for _ in 0..5 {
                 tmp |= watch & (tmp >> shift);
             }
@@ -82,9 +82,9 @@ impl Board for BitBoard {
             Side::White => (self.white, self.black),
         };
         for &(shift, mask) in [
-            (8, 0xffffffffffffff00), // 上
-            (7, 0x7f7f7f7f7f7f7f00), // 右上
             (1, 0xfefefefefefefefe), // 左
+            (7, 0x7f7f7f7f7f7f7f00), // 右上
+            (8, 0xffffffffffffff00), // 上
             (9, 0xfefefefefefefe00), // 左上
         ]
         .iter()
@@ -101,9 +101,9 @@ impl Board for BitBoard {
         }
         for &(shift, mask) in [
             (1, 0x7f7f7f7f7f7f7f7f), // 右
-            (9, 0x007f7f7f7f7f7f7f), // 右下
-            (8, 0x00ffffffffffffff), // 下
             (7, 0x00fefefefefefefe), // 左下
+            (8, 0x00ffffffffffffff), // 下
+            (9, 0x007f7f7f7f7f7f7f), // 右下
         ]
         .iter()
         {
@@ -135,14 +135,21 @@ impl Board for BitBoard {
             Side::White => can_put(self.white, self.black),
         };
         let mut v = Vec::with_capacity(p.count_ones() as usize);
+        let mut mask_row = 0xFF00000000000000_u64;
         let mut mask = 0x8000000000000000_u64;
         for row in 0..8 {
+            if p & mask_row == 0 {
+                mask_row >>= 8;
+                mask >>= 8;
+                continue;
+            }
             for col in 0..8 {
                 if p & mask != 0 {
                     v.push((col, row));
                 }
                 mask >>= 1;
             }
+            mask_row >>= 8;
         }
         v
     }
