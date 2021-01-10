@@ -72,7 +72,7 @@ where
 
     fn count<'a, B: Board, A: Args<'a>>(board: &B, args: &'a mut A) {
         let b = args.next().unwrap().parse().expect("count [B] W");
-        let w = args.next().unwrap().parse().expect("count [B] W");
+        let w = args.next().unwrap().parse().expect("count B [W]");
         assert_eq!(board.count(), (b, w));
     }
 

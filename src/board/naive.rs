@@ -1,3 +1,8 @@
+use std::{
+    convert::{TryFrom, TryInto},
+    str::FromStr,
+};
+
 use super::{Board, Side, SIZE};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -5,6 +10,7 @@ pub enum Cell {
     Vacant,
     Occupied(Side),
 }
+
 impl std::fmt::Display for Cell {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use std::fmt::Write;
@@ -19,6 +25,18 @@ impl std::fmt::Display for Cell {
 impl Default for Cell {
     fn default() -> Cell {
         Cell::Vacant
+    }
+}
+
+impl TryFrom<char> for Cell {
+    type Error = ();
+    fn try_from(c: char) -> Result<Self, Self::Error> {
+        match c {
+            '_' | '*' => Ok(Cell::Vacant),
+            '●' => Ok(Cell::Occupied(Side::Black)),
+            '○' => Ok(Cell::Occupied(Side::White)),
+            _ => Err(()),
+        }
     }
 }
 
@@ -174,6 +192,24 @@ impl std::fmt::Display for NaiveBoard {
     }
 }
 
+impl FromStr for NaiveBoard {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut chars = s.chars();
+        let mut board = [[Cell::Vacant; SIZE]; SIZE];
+        for row in board.iter_mut() {
+            for cell in row.iter_mut() {
+                *cell = chars.next().ok_or(()).map(|c| c.try_into())??;
+            }
+            match chars.next() {
+                Some('\n') | None => (),
+                _ => return Err(()),
+            }
+        }
+        Ok(NaiveBoard { board })
+    }
+}
+
 struct Repeat<T>(T);
 
 impl<T: Copy> Iterator for Repeat<T> {
@@ -181,5 +217,25 @@ impl<T: Copy> Iterator for Repeat<T> {
     #[inline]
     fn next(&mut self) -> Option<T> {
         Some(self.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_str() {
+        let mut expect = NaiveBoard::default();
+        expect.put(2, 3, Side::Black);
+        let s = r"________
+________
+__*_*___
+__●●●___
+__*●○___
+________
+________
+________";
+        assert_eq!(expect, s.parse().unwrap());
     }
 }

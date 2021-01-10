@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, str::FromStr};
 
 pub mod naive;
 
@@ -30,7 +30,7 @@ impl Side {
 
 pub type Count = u8;
 
-pub trait Board: Display + Clone + Eq {
+pub trait Board: Display + FromStr + Clone {
     fn put(&mut self, col: usize, row: usize, side: Side);
 
     fn list_candidates(&self, side: Side) -> Vec<(usize, usize)>;
