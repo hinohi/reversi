@@ -1,44 +1,6 @@
-use std::{
-    convert::{TryFrom, TryInto},
-    str::FromStr,
-};
+use std::{convert::TryInto, str::FromStr};
 
-use super::{Board, Side, SIZE};
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum Cell {
-    Vacant,
-    Occupied(Side),
-}
-
-impl std::fmt::Display for Cell {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::fmt::Write;
-        match self {
-            Cell::Vacant => f.write_char('_'),
-            Cell::Occupied(Side::Black) => f.write_char('●'),
-            Cell::Occupied(Side::White) => f.write_char('○'),
-        }
-    }
-}
-
-impl Default for Cell {
-    fn default() -> Cell {
-        Cell::Vacant
-    }
-}
-
-impl TryFrom<char> for Cell {
-    type Error = ();
-    fn try_from(c: char) -> Result<Self, Self::Error> {
-        match c {
-            '_' | '*' => Ok(Cell::Vacant),
-            '●' => Ok(Cell::Occupied(Side::Black)),
-            '○' => Ok(Cell::Occupied(Side::White)),
-            _ => Err(()),
-        }
-    }
-}
+use super::{Board, Cell, Side, SIZE};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Enum2dBoard {

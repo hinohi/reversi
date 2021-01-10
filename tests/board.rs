@@ -91,6 +91,11 @@ where
 }
 
 #[test]
-fn replay001_naive() {
+fn replay001_enum2d() {
+    replay_scenario("tests/board_cases/001.txt", Enum2dBoard::default());
+}
+
+#[test]
+fn replay001_enum1d() {
     replay_scenario("tests/board_cases/001.txt", Enum2dBoard::default());
 }

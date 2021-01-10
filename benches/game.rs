@@ -4,6 +4,7 @@ use rand_pcg::Mcg128Xsl64;
 use criterion::{criterion_group, criterion_main, Criterion};
 
 use reversi::{
+    enum1d::Enum1dBoard,
     enum2d::Enum2dBoard,
     search::{RandomFullSearch, RandomSearch},
     Game, Side,
@@ -16,6 +17,20 @@ fn enum2d(c: &mut Criterion) {
             let mut game = Game::new(
                 RandomSearch::<Enum2dBoard, _>::new(Mcg128Xsl64::from_rng(&mut rng).unwrap()),
                 RandomSearch::<Enum2dBoard, _>::new(Mcg128Xsl64::from_rng(&mut rng).unwrap()),
+            );
+            let (b, w) = game.play_game();
+            assert!(b + w <= 64);
+        });
+    });
+}
+
+fn enum1d(c: &mut Criterion) {
+    let mut rng = Mcg128Xsl64::new(1);
+    c.bench_function("enum1d", |b| {
+        b.iter(|| {
+            let mut game = Game::new(
+                RandomSearch::<Enum1dBoard, _>::new(Mcg128Xsl64::from_rng(&mut rng).unwrap()),
+                RandomSearch::<Enum1dBoard, _>::new(Mcg128Xsl64::from_rng(&mut rng).unwrap()),
             );
             let (b, w) = game.play_game();
             assert!(b + w <= 64);
@@ -45,5 +60,5 @@ fn enum2d_full10(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, enum2d, enum2d_full10);
+criterion_group!(benches, enum2d, enum1d, enum2d_full10);
 criterion_main!(benches);
