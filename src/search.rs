@@ -81,6 +81,25 @@ pub fn search_exact<B: Board>(board: &B, side: Side) -> CountTurn {
     exact_inner(board, side, false, 0, CountTurn::MIN, CountTurn::MAX)
 }
 
+pub fn search_exact_with_candidates<B: Board>(
+    board: &B,
+    side: Side,
+    candidates: &[(usize, usize)],
+) -> (usize, CountTurn) {
+    let mut alpha = CountTurn::MIN;
+    let mut best = 0;
+    for (i, &(col, row)) in candidates.iter().enumerate() {
+        let mut board = board.clone();
+        board.put(col, row, side);
+        let a = exact_inner(&board, side.flip(), false, 1, CountTurn::MIN, alpha.flip()).flip();
+        if a > alpha {
+            alpha = a;
+            best = i;
+        }
+    }
+    (best, alpha)
+}
+
 fn exact_inner<B: Board>(
     board: &B,
     side: Side,

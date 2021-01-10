@@ -14,5 +14,5 @@ rand_pcg = "*"
 criterion = "*"
 
 [[bench]]
-name = "board"
+name = "game"
 harness = false
