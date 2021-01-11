@@ -74,8 +74,10 @@ fn can_put(mine: u64, opp: u64) -> u64 {
 }
 
 impl Board for BitBoard {
-    fn put(&mut self, col: usize, row: usize, side: Side) {
-        let p: u64 = 0x8000000000000000 >> (row * 8 + col);
+    type Position = u8;
+
+    fn put(&mut self, side: Side, position: Self::Position) {
+        let p: u64 = 0x8000000000000000 >> position;
         let mut rev = 0;
         let (mine, opp) = match side {
             Side::Black => (self.black, self.white),
@@ -129,27 +131,32 @@ impl Board for BitBoard {
         }
     }
 
-    fn list_candidates(&self, side: Side) -> Vec<(usize, usize)> {
+    fn list_candidates(&self, side: Side) -> Vec<Self::Position> {
         let p = match side {
             Side::Black => can_put(self.black, self.white),
             Side::White => can_put(self.white, self.black),
         };
         let mut v = Vec::with_capacity(p.count_ones() as usize);
-        let mut mask_row = 0xFF00000000000000_u64;
-        let mut mask = 0x8000000000000000_u64;
-        for row in 0..8 {
-            if p & mask_row == 0 {
-                mask_row >>= 8;
-                mask >>= 8;
-                continue;
-            }
-            for col in 0..8 {
-                if p & mask != 0 {
-                    v.push((col, row));
+
+        const L2: u8 = 16;
+        let mut i = 0;
+        let mut mask_1 = 0x8000000000000000;
+        let mut mask_2 = 0xFFFF000000000000;
+        while i < 64 {
+            if p & mask_2 == 0 {
+                i += L2;
+                mask_1 >>= L2;
+                mask_2 >>= L2;
+            } else {
+                for _ in 0..L2 {
+                    if p & mask_1 != 0 {
+                        v.push(i);
+                    }
+                    i += 1;
+                    mask_1 >>= 1;
                 }
-                mask >>= 1;
+                mask_2 >>= L2;
             }
-            mask_row >>= 8;
         }
         v
     }
@@ -159,6 +166,14 @@ impl Board for BitBoard {
             self.black.count_ones() as Count,
             self.white.count_ones() as Count,
         )
+    }
+
+    fn col_row(position: Self::Position) -> (usize, usize) {
+        (position as usize % 8, position as usize / 8)
+    }
+
+    fn position(col: usize, row: usize) -> Self::Position {
+        (row * 8 + col) as Self::Position
     }
 }
 

@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::{convert::TryFrom, fmt::Display, str::FromStr};
 
 pub mod bit;
@@ -33,12 +34,18 @@ impl Side {
 pub type Count = u8;
 
 pub trait Board: Display + FromStr + Clone + Default {
-    fn put(&mut self, col: usize, row: usize, side: Side);
+    type Position: Copy + Debug + Ord + Eq;
 
-    fn list_candidates(&self, side: Side) -> Vec<(usize, usize)>;
+    fn put(&mut self, side: Side, position: Self::Position);
+
+    fn list_candidates(&self, side: Side) -> Vec<Self::Position>;
 
     /// Calculate the number of black, white
     fn count(&self) -> (Count, Count);
+
+    fn col_row(position: Self::Position) -> (usize, usize);
+
+    fn position(col: usize, row: usize) -> Self::Position;
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]

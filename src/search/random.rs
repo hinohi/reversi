@@ -26,7 +26,7 @@ impl<B: Board, R: Rng> Search for RandomSearch<B, R> {
         &mut self,
         _board: &Self::Board,
         _occupied: Occupied,
-        candidates: &[(usize, usize)],
+        candidates: &[B::Position],
     ) -> usize {
         self.rng.gen_range(0..candidates.len())
     }
@@ -61,7 +61,7 @@ impl<B: Board, R: Rng> Search for RandomFullSearch<B, R> {
         &mut self,
         board: &Self::Board,
         occupied: Occupied,
-        candidates: &[(usize, usize)],
+        candidates: &[B::Position],
     ) -> usize {
         if occupied < self.full_search_threshold {
             self.rng.gen_range(0..candidates.len())

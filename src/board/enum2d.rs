@@ -63,7 +63,9 @@ impl Enum2dBoard {
 }
 
 impl Board for Enum2dBoard {
-    fn put(&mut self, col: usize, row: usize, side: Side) {
+    type Position = (usize, usize);
+    fn put(&mut self, side: Side, position: Self::Position) {
+        let (col, row) = position;
         self.board[row][col] = Cell::Occupied(side);
         // col+1 row±0
         let count = self.check_one_dir(side, (col + 1..SIZE).zip(Repeat(row)));
@@ -107,7 +109,7 @@ impl Board for Enum2dBoard {
         }
     }
 
-    fn list_candidates(&self, side: Side) -> Vec<(usize, usize)> {
+    fn list_candidates(&self, side: Side) -> Vec<Self::Position> {
         let mut v = Vec::new();
         for (i, row) in self.board.iter().enumerate() {
             for (j, &c) in row.iter().enumerate() {
@@ -132,6 +134,14 @@ impl Board for Enum2dBoard {
             }
         }
         (black, white)
+    }
+
+    fn col_row(position: Self::Position) -> (usize, usize) {
+        position
+    }
+
+    fn position(col: usize, row: usize) -> Self::Position {
+        (col, row)
     }
 }
 
@@ -189,7 +199,7 @@ mod tests {
     #[test]
     fn from_str() {
         let mut expect = Enum2dBoard::default();
-        expect.put(2, 3, Side::Black);
+        expect.put(Side::Black, (2, 3));
         let s = r"________
 ________
 __*_*___

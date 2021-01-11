@@ -68,7 +68,11 @@ where
                 let choice =
                     self.black_searcher
                         .search(&self.black_board, self.occupied, &b_candidates);
-                let (col, row) = b_candidates[choice];
+                let pos = b_candidates[choice];
+                self.black_board.put(self.side, pos);
+                let (col, row) = B::Board::col_row(pos);
+                self.white_board
+                    .put(self.side, W::Board::position(col, row));
                 (Side::Black, col, row)
             }
             Side::White => {
@@ -76,12 +80,14 @@ where
                 let choice =
                     self.white_searcher
                         .search(&self.white_board, self.occupied, &w_candidates);
-                let (col, row) = w_candidates[choice];
+                let pos = w_candidates[choice];
+                self.white_board.put(self.side, pos);
+                let (col, row) = W::Board::col_row(pos);
+                self.black_board
+                    .put(self.side, B::Board::position(col, row));
                 (Side::White, col, row)
             }
         };
-        self.black_board.put(col, row, side);
-        self.white_board.put(col, row, side);
         self.side = self.side.flip();
         self.last_passed = false;
         self.occupied += 1;

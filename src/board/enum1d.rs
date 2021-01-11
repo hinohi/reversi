@@ -56,22 +56,24 @@ impl Enum1dBoard {
 }
 
 impl Board for Enum1dBoard {
-    fn put(&mut self, col: usize, row: usize, side: Side) {
-        let p = (row + 1) * L + col + 1;
-        self.board[p] = Cell::Occupied(side);
+    type Position = usize;
+
+    fn put(&mut self, side: Side, position: Self::Position) {
+        self.board[position] = Cell::Occupied(side);
         for &d in D.iter() {
-            self.put_one_dir(side, p as isize, d, self.check_one_dir(side, p as isize, d));
+            let count = self.check_one_dir(side, position as isize, d);
+            self.put_one_dir(side, position as isize, d, count);
         }
     }
 
-    fn list_candidates(&self, side: Side) -> Vec<(usize, usize)> {
+    fn list_candidates(&self, side: Side) -> Vec<Self::Position> {
         let mut v = Vec::new();
         for row in 1..L - 1 {
             for col in 1..L - 1 {
                 let p = row * L + col;
                 let c = unsafe { self.board.get_unchecked(p) };
                 if *c == Cell::Vacant && self.can_put(side, p as isize) {
-                    v.push((col - 1, row - 1));
+                    v.push(p);
                 }
             }
         }
@@ -89,6 +91,14 @@ impl Board for Enum1dBoard {
             }
         }
         (black, white)
+    }
+
+    fn col_row(position: Self::Position) -> (usize, usize) {
+        (position % L - 1, position / L - 1)
+    }
+
+    fn position(col: usize, row: usize) -> Self::Position {
+        (row + 1) * L + col + 1
     }
 }
 

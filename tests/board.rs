@@ -40,7 +40,7 @@ where
             for (c, ch) in row.chars().enumerate() {
                 match ch {
                     '*' => {
-                        expect.push((c, r));
+                        expect.push(B::position(c, r));
                     }
                     '●' | '○' | '_' | '\n' => (),
                     ch => panic!(format!("Unexpected char: {}", ch)),
@@ -64,10 +64,10 @@ where
             "W" => Side::White,
             _ => panic!("put [BW] col row"),
         };
-        let col = args.next().unwrap().parse().expect("put BW [col] row");
-        let row = args.next().unwrap().parse().expect("put BW col [row]");
+        let col: usize = args.next().unwrap().parse().expect("put BW [col] row");
+        let row: usize = args.next().unwrap().parse().expect("put BW col [row]");
         println!("put {:?} {} {}", side, col, row);
-        board.put(col, row, side);
+        board.put(side, B::position(col, row));
     }
 
     fn count<'a, B: Board, A: Args<'a>>(board: &B, args: &'a mut A) {

@@ -11,7 +11,7 @@ pub trait Search {
         &mut self,
         board: &Self::Board,
         occupied: Occupied,
-        candidates: &[(usize, usize)],
+        candidates: &[<<Self as Search>::Board as Board>::Position],
     ) -> usize;
 }
 
@@ -86,13 +86,13 @@ pub fn search_exact<B: Board>(board: &B, side: Side) -> CountTurn {
 pub fn search_exact_with_candidates<B: Board>(
     board: &B,
     side: Side,
-    candidates: &[(usize, usize)],
+    candidates: &[B::Position],
 ) -> (usize, CountTurn) {
     let mut alpha = CountTurn::MIN;
     let mut best = 0;
-    for (i, &(col, row)) in candidates.iter().enumerate() {
+    for (i, &pos) in candidates.iter().enumerate() {
         let mut board = board.clone();
-        board.put(col, row, side);
+        board.put(side, pos);
         let a = exact_inner(&board, side.flip(), false, 1, CountTurn::MIN, alpha.flip()).flip();
         if a > alpha {
             alpha = a;
@@ -119,9 +119,9 @@ fn exact_inner<B: Board>(
             exact_inner(board, side.flip(), true, turn, beta.flip(), alpha.flip()).flip()
         };
     }
-    for (col, row) in candidates {
+    for pos in candidates {
         let mut board = board.clone();
-        board.put(col, row, side);
+        board.put(side, pos);
         let a = exact_inner(
             &board,
             side.flip(),
