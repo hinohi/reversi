@@ -58,7 +58,9 @@ impl Ord for CountTurn {
             (_, 0, _, _) => Greater,
             (_, _, _, 0) => Less,
             // 割合ではなく絶対値で比較
-            (sm, so, om, oo) => (sm, R(so), R(self.turn)).cmp(&(om, R(oo), R(other.turn))),
+            (sm, so, om, oo) => {
+                (sm as i8 - so as i8, R(self.turn)).cmp(&(om as i8 - oo as i8, R(other.turn)))
+            }
         }
     }
 }
