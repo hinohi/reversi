@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use crate::{
     board::{Board, Count, Side},
     search::{Occupied, Search},
@@ -46,10 +44,8 @@ where
     }
 
     fn game_set(&self) -> ActionResult {
-        let b_count = self.black_board.count();
-        let w_count = self.white_board.count();
-        assert_eq!(b_count, w_count);
-        ActionResult::GameSet(b_count.0, b_count.1)
+        let (b, w) = self.black_board.count();
+        ActionResult::GameSet(b, w)
     }
 
     pub fn play_one_turn(&mut self) -> ActionResult {
@@ -57,11 +53,6 @@ where
             return self.game_set();
         }
         let b_candidates = self.black_board.list_candidates(self.side);
-        let w_candidates = self.white_board.list_candidates(self.side);
-        assert_eq!(
-            b_candidates.iter().collect::<HashSet<_>>(),
-            w_candidates.iter().collect::<HashSet<_>>(),
-        );
         if b_candidates.is_empty() {
             return if self.last_passed {
                 self.game_set()
@@ -81,6 +72,7 @@ where
                 (Side::Black, col, row)
             }
             Side::White => {
+                let w_candidates = self.white_board.list_candidates(self.side);
                 let choice =
                     self.white_searcher
                         .search(&self.white_board, self.occupied, &w_candidates);
