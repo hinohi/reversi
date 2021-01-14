@@ -223,3 +223,57 @@ impl FromStr for BitBoard {
         Ok(BitBoard { black, white })
     }
 }
+
+impl BitBoard {
+    pub fn symmetry(&self, flag: u32) -> BitBoard {
+        let mut sym = self.clone();
+        if flag & 1 != 0 {
+            sym.black = horizontal_mirror(sym.black);
+            sym.white = horizontal_mirror(sym.white);
+        }
+        if flag & 2 != 0 {
+            sym.black = vertical_mirror(sym.black);
+            sym.white = vertical_mirror(sym.white);
+        }
+        if flag & 4 != 0 {
+            sym.black = transpose(sym.black);
+            sym.white = transpose(sym.white);
+        }
+        sym
+    }
+
+    pub fn unique(&self) -> BitBoard {
+        let mut u = self.clone();
+        for f in 1..8 {
+            let sym = self.symmetry(f);
+            if (sym.black, sym.white) < (u.black, u.white) {
+                u = sym;
+            }
+        }
+        u
+    }
+}
+
+fn horizontal_mirror(mut b: u64) -> u64 {
+    b = ((b >> 1) & 0x5555555555555555) | ((b << 1) & 0xAAAAAAAAAAAAAAAA);
+    b = ((b >> 2) & 0x3333333333333333) | ((b << 2) & 0xCCCCCCCCCCCCCCCC);
+    b = ((b >> 4) & 0x0F0F0F0F0F0F0F0F) | ((b << 4) & 0xF0F0F0F0F0F0F0F0);
+    b
+}
+
+fn vertical_mirror(mut b: u64) -> u64 {
+    b = ((b >> 8) & 0x00FF00FF00FF00FF) | ((b << 8) & 0xFF00FF00FF00FF00);
+    b = ((b >> 16) & 0x0000FFFF0000FFFF) | ((b << 16) & 0xFFFF0000FFFF0000);
+    b = ((b >> 32) & 0x00000000FFFFFFFF) | ((b << 32) & 0xFFFFFFFF00000000);
+    b
+}
+
+fn transpose(mut b: u64) -> u64 {
+    let mut t = (b ^ (b >> 7)) & 0x00aa00aa00aa00aa;
+    b = b ^ t ^ (t << 7);
+    t = (b ^ (b >> 14)) & 0x0000cccc0000cccc;
+    b = b ^ t ^ (t << 14);
+    t = (b ^ (b >> 28)) & 0x00000000f0f0f0f0;
+    b = b ^ t ^ (t << 28);
+    b
+}
