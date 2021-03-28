@@ -50,8 +50,8 @@ where
         if self.occupied == 64 {
             return self.game_set();
         }
-        let b_candidates = self.board.list_candidates(self.side);
-        if b_candidates.is_empty() {
+        let candidates = self.board.list_candidates(self.side);
+        if candidates.is_empty() {
             return if self.last_passed {
                 self.game_set()
             } else {
@@ -65,18 +65,17 @@ where
             Side::Black => {
                 let choice = self
                     .black_searcher
-                    .search(&self.board, self.occupied, &b_candidates);
-                let pos = b_candidates[choice];
+                    .search(&self.board, self.occupied, &candidates);
+                let pos = candidates[choice];
                 self.board.put(self.side, pos);
                 let (col, row) = BitBoard::col_row(pos);
                 (Side::Black, col, row)
             }
             Side::White => {
-                let w_candidates = self.board.list_candidates(self.side);
                 let choice = self
                     .white_searcher
-                    .search(&self.board, self.occupied, &w_candidates);
-                let pos = w_candidates[choice];
+                    .search(&self.board, self.occupied, &candidates);
+                let pos = candidates[choice];
                 self.board.put(self.side, pos);
                 let (col, row) = BitBoard::col_row(pos);
                 (Side::White, col, row)
