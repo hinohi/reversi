@@ -43,7 +43,7 @@ where
                         expect.push(B::position(c, r));
                     }
                     '●' | '○' | '_' | '\n' => (),
-                    ch => panic!(format!("Unexpected char: {}", ch)),
+                    ch => panic!("Unexpected char: {}", ch),
                 };
             }
         }
@@ -84,7 +84,7 @@ where
             Some("put") => put(&mut board, &mut cmd),
             Some("count") => count(&board, &mut cmd),
             Some("candidates") => candidates(&board, &mut cmd, &mut scenario),
-            Some(c) => panic!(format!("Unsupported command: {}", c)),
+            Some(c) => panic!("Unsupported command: {}", c),
             None => (),
         }
     }
