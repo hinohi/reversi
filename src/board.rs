@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::io::Write;
 
 pub const SIZE: usize = 8;
 pub type Count = u8;
@@ -203,50 +203,23 @@ impl Iterator for Candidate {
     }
 }
 
-impl std::fmt::Display for BitBoard {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::fmt::Write;
+impl BitBoard {
+    pub fn format<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
         let mut mask = 0x8000000000000000;
         for _ in 0..8 {
             for _ in 0..8 {
                 if self.black & mask != 0 {
-                    f.write_char('●')?;
+                    write!(writer, "●")?;
                 } else if self.white & mask != 0 {
-                    f.write_char('○')?;
+                    write!(writer, "○")?;
                 } else {
-                    f.write_char('_')?;
+                    write!(writer, "_")?;
                 }
                 mask >>= 1
             }
-            f.write_char('\n')?;
+            writeln!(writer)?;
         }
         Ok(())
-    }
-}
-
-impl FromStr for BitBoard {
-    type Err = ();
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut chars = s.chars();
-        let mut p = 0x8000000000000000_u64;
-        let mut black = 0;
-        let mut white = 0;
-        for _ in 0..8 {
-            for _ in 0..8 {
-                match chars.next().ok_or(())? {
-                    '●' => black ^= p,
-                    '○' => white ^= p,
-                    '_' | '*' => (),
-                    _ => return Err(()),
-                }
-                p >>= 1;
-            }
-            match chars.next() {
-                Some('\n') | None => (),
-                _ => return Err(()),
-            }
-        }
-        Ok(BitBoard { black, white })
     }
 }
 

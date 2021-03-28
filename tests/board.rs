@@ -24,8 +24,9 @@ where
             expect.push_str(&scenario.next().unwrap().unwrap());
             expect.push('\n');
         }
-        let actual = format!("{}", board);
-        assert_eq!(expect, actual);
+        let mut actual = Vec::new();
+        board.format(&mut actual).unwrap();
+        assert_eq!(expect, String::from_utf8(actual).unwrap());
     }
 
     fn candidates<'a, A: Args<'a>, S: Scenario>(
