@@ -159,10 +159,7 @@ impl BitBoard {
             Side::Black => can_put(self.black, self.white),
             Side::White => can_put(self.white, self.black),
         };
-        Candidate {
-            pos,
-            mask: 0x8000000000000000,
-        }
+        Candidate { pos }
     }
 
     pub fn count(&self) -> (Count, Count) {
@@ -185,22 +182,18 @@ impl BitBoard {
 #[derive(Debug)]
 pub struct Candidate {
     pos: u64,
-    mask: u64,
 }
 
 impl Iterator for Candidate {
     type Item = u64;
     fn next(&mut self) -> Option<u64> {
-        while self.pos & self.mask != self.mask {
-            self.mask >>= 1;
-        }
-        if self.mask == 0 {
+        let c = self.pos.leading_zeros();
+        if c == 64 {
             None
         } else {
-            let mask = self.mask;
-            self.mask >>= 1;
-            self.pos -= mask; // for size_hint
-            Some(mask)
+            let p = 0x8000000000000000 >> c;
+            self.pos -= p;
+            Some(p)
         }
     }
 
