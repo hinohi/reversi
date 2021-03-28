@@ -1,5 +1,5 @@
 use crate::{
-    board::{Board, Count, Side},
+    board::{BitBoard, Count, Side},
     search::{Occupied, Search},
 };
 use std::fmt::Debug;
@@ -13,8 +13,7 @@ where
     side: Side,
     occupied: Occupied,
     last_passed: bool,
-    black_board: B::Board,
-    white_board: W::Board,
+    board: BitBoard,
     black_searcher: B,
     white_searcher: W,
 }
@@ -36,15 +35,14 @@ where
             side: Side::Black,
             occupied: 4,
             last_passed: false,
-            black_board: B::Board::default(),
-            white_board: W::Board::default(),
+            board: BitBoard::new(),
             black_searcher,
             white_searcher,
         }
     }
 
     fn game_set(&self) -> ActionResult {
-        let (b, w) = self.black_board.count();
+        let (b, w) = self.board.count();
         ActionResult::GameSet(b, w)
     }
 
@@ -52,7 +50,7 @@ where
         if self.occupied == 64 {
             return self.game_set();
         }
-        let b_candidates = self.black_board.list_candidates(self.side);
+        let b_candidates = self.board.list_candidates(self.side);
         if b_candidates.is_empty() {
             return if self.last_passed {
                 self.game_set()
@@ -65,26 +63,22 @@ where
         }
         let (side, col, row) = match self.side {
             Side::Black => {
-                let choice =
-                    self.black_searcher
-                        .search(&self.black_board, self.occupied, &b_candidates);
+                let choice = self
+                    .black_searcher
+                    .search(&self.board, self.occupied, &b_candidates);
                 let pos = b_candidates[choice];
-                self.black_board.put(self.side, pos);
-                let (col, row) = B::Board::col_row(pos);
-                self.white_board
-                    .put(self.side, W::Board::position(col, row));
+                self.board.put(self.side, pos);
+                let (col, row) = BitBoard::col_row(pos);
                 (Side::Black, col, row)
             }
             Side::White => {
-                let w_candidates = self.white_board.list_candidates(self.side);
-                let choice =
-                    self.white_searcher
-                        .search(&self.white_board, self.occupied, &w_candidates);
+                let w_candidates = self.board.list_candidates(self.side);
+                let choice = self
+                    .white_searcher
+                    .search(&self.board, self.occupied, &w_candidates);
                 let pos = w_candidates[choice];
-                self.white_board.put(self.side, pos);
-                let (col, row) = W::Board::col_row(pos);
-                self.black_board
-                    .put(self.side, B::Board::position(col, row));
+                self.board.put(self.side, pos);
+                let (col, row) = BitBoard::col_row(pos);
                 (Side::White, col, row)
             }
         };

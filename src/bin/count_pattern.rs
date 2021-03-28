@@ -1,4 +1,4 @@
-use reversi::{bit::BitBoard, Board, Side};
+use reversi::{BitBoard, Side};
 use std::collections::HashSet;
 
 fn main() {

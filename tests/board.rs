@@ -4,12 +4,11 @@ use std::{
     path::Path,
 };
 
-use reversi::{bit::BitBoard, enum1d::Enum1dBoard, enum2d::Enum2dBoard, Board, Side};
+use reversi::{BitBoard, Side};
 
-fn replay_scenario<P, B>(scenario: P, mut board: B)
+fn replay_scenario<P>(scenario: P, mut board: BitBoard)
 where
     P: AsRef<Path>,
-    B: Board,
 {
     let mut scenario =
         BufReader::new(File::open(scenario).expect("scenario file expected")).lines();
@@ -19,7 +18,7 @@ where
     trait Args<'a>: Iterator<Item = &'a str> {}
     impl<'a, T: Iterator<Item = &'a str>> Args<'a> for T {}
 
-    fn compare<B: Board, S: Scenario>(board: &B, scenario: &mut S) {
+    fn compare<S: Scenario>(board: &BitBoard, scenario: &mut S) {
         let mut expect = String::with_capacity(9 * 8);
         for _ in 0..8 {
             expect.push_str(&scenario.next().unwrap().unwrap());
@@ -29,8 +28,8 @@ where
         assert_eq!(expect, actual);
     }
 
-    fn candidates<'a, B: Board, A: Args<'a>, S: Scenario>(
-        board: &B,
+    fn candidates<'a, A: Args<'a>, S: Scenario>(
+        board: &BitBoard,
         args: &'a mut A,
         scenario: &mut S,
     ) {
@@ -40,7 +39,7 @@ where
             for (c, ch) in row.chars().enumerate() {
                 match ch {
                     '*' => {
-                        expect.push(B::position(c, r));
+                        expect.push(BitBoard::position(c, r));
                     }
                     '●' | '○' | '_' | '\n' => (),
                     ch => panic!("Unexpected char: {}", ch),
@@ -58,7 +57,7 @@ where
         assert_eq!(expect, actual);
     }
 
-    fn put<'a, B: Board, A: Args<'a>>(board: &mut B, args: &'a mut A) {
+    fn put<'a, A: Args<'a>>(board: &mut BitBoard, args: &'a mut A) {
         let side = match args.next().expect("put [BW] col row") {
             "B" => Side::Black,
             "W" => Side::White,
@@ -67,10 +66,10 @@ where
         let col: usize = args.next().unwrap().parse().expect("put BW [col] row");
         let row: usize = args.next().unwrap().parse().expect("put BW col [row]");
         println!("put {:?} {} {}", side, col, row);
-        board.put(side, B::position(col, row));
+        board.put(side, BitBoard::position(col, row));
     }
 
-    fn count<'a, B: Board, A: Args<'a>>(board: &B, args: &'a mut A) {
+    fn count<'a, A: Args<'a>>(board: &BitBoard, args: &'a mut A) {
         let b = args.next().unwrap().parse().expect("count [B] W");
         let w = args.next().unwrap().parse().expect("count B [W]");
         assert_eq!(board.count(), (b, w));
@@ -91,28 +90,8 @@ where
 }
 
 #[test]
-fn replay001_enum2d() {
-    replay_scenario("tests/board_cases/001.txt", Enum2dBoard::default());
-}
-
-#[test]
-fn replay001_enum1d() {
-    replay_scenario("tests/board_cases/001.txt", Enum1dBoard::default());
-}
-
-#[test]
 fn replay001_bit() {
     replay_scenario("tests/board_cases/001.txt", BitBoard::default());
-}
-
-#[test]
-fn replay002_enum2d() {
-    replay_scenario("tests/board_cases/002.txt", Enum2dBoard::default());
-}
-
-#[test]
-fn replay002_enum1d() {
-    replay_scenario("tests/board_cases/002.txt", Enum1dBoard::default());
 }
 
 #[test]
