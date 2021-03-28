@@ -50,8 +50,9 @@ where
         if self.occupied == 64 {
             return self.game_set();
         }
-        let candidates = self.board.list_candidates(self.side);
-        if candidates.is_empty() {
+        let mut candidates = self.board.candidates(self.side);
+        // これは暗黙の仕様すぎる気もする
+        if candidates.size_hint().0 == 0 {
             return if self.last_passed {
                 self.game_set()
             } else {
@@ -63,21 +64,19 @@ where
         }
         let (side, col, row) = match self.side {
             Side::Black => {
-                let choice = self
-                    .black_searcher
-                    .search(&self.board, self.occupied, &candidates);
-                let pos = candidates[choice];
-                self.board.put(self.side, pos);
-                let (col, row) = BitBoard::col_row(pos);
+                let position =
+                    self.black_searcher
+                        .search(&self.board, self.occupied, &mut candidates);
+                self.board.put(self.side, position);
+                let (col, row) = BitBoard::col_row(position);
                 (Side::Black, col, row)
             }
             Side::White => {
-                let choice = self
-                    .white_searcher
-                    .search(&self.board, self.occupied, &candidates);
-                let pos = candidates[choice];
-                self.board.put(self.side, pos);
-                let (col, row) = BitBoard::col_row(pos);
+                let position =
+                    self.white_searcher
+                        .search(&self.board, self.occupied, &mut candidates);
+                self.board.put(self.side, position);
+                let (col, row) = BitBoard::col_row(position);
                 (Side::White, col, row)
             }
         };

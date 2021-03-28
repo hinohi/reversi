@@ -1,7 +1,7 @@
 use rand::Rng;
 
-use super::{search_exact_with_candidates, Occupied, Search};
-use crate::{BitBoard, Side};
+use super::{search_exact_with_candidates, Occupied, Position, Search};
+use crate::{BitBoard, Candidate, Side};
 
 #[derive(Debug, Clone)]
 pub struct RandomSearch<R> {
@@ -15,8 +15,14 @@ impl<R> RandomSearch<R> {
 }
 
 impl<R: Rng> Search for RandomSearch<R> {
-    fn search(&mut self, _board: &BitBoard, _occupied: Occupied, candidates: &[u8]) -> usize {
-        self.rng.gen_range(0..candidates.len())
+    fn search(
+        &mut self,
+        _board: &BitBoard,
+        _occupied: Occupied,
+        candidates: &mut Candidate,
+    ) -> Position {
+        let i = self.rng.gen_range(0..candidates.size_hint().0);
+        candidates.nth(i).unwrap()
     }
 }
 
@@ -38,9 +44,15 @@ impl<R> RandomFullSearch<R> {
 }
 
 impl<R: Rng> Search for RandomFullSearch<R> {
-    fn search(&mut self, board: &BitBoard, occupied: Occupied, candidates: &[u8]) -> usize {
+    fn search(
+        &mut self,
+        board: &BitBoard,
+        occupied: Occupied,
+        candidates: &mut Candidate,
+    ) -> Position {
         if occupied < self.full_search_threshold {
-            self.rng.gen_range(0..candidates.len())
+            let i = self.rng.gen_range(0..candidates.size_hint().0);
+            candidates.nth(i).unwrap()
         } else {
             search_exact_with_candidates(board, self.side, candidates).0
         }

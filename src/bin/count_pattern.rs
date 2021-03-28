@@ -11,14 +11,14 @@ fn main() {
         let mut next_unique = HashSet::with_capacity(unique.len());
         let mut next_direct = HashSet::with_capacity(direct.len());
         for b in unique.iter() {
-            for p in b.list_candidates(side) {
+            for p in b.candidates(side) {
                 let mut b = b.clone();
                 b.put(side, p);
                 next_unique.insert(b.unique());
             }
         }
         for b in direct.iter() {
-            for p in b.list_candidates(side) {
+            for p in b.candidates(side) {
                 let mut b = b.clone();
                 b.put(side, p);
                 next_direct.insert(b);

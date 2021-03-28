@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 pub const SIZE: usize = 8;
 pub type Count = u8;
+pub type Position = u64;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum Side {
@@ -99,8 +100,7 @@ fn can_put(mine: u64, opp: u64) -> u64 {
 }
 
 impl BitBoard {
-    pub fn put(&mut self, side: Side, position: u8) {
-        let p: u64 = 0x8000000000000000 >> position;
+    pub fn put(&mut self, side: Side, position: Position) {
         let mut rev = 0;
         let (mine, opp) = match side {
             Side::Black => (self.black, self.white),
@@ -115,7 +115,7 @@ impl BitBoard {
         .iter()
         {
             let mut tmp = 0;
-            let mut masked = (p << shift) & mask;
+            let mut masked = (position << shift) & mask;
             while masked != 0 && (masked & opp) != 0 {
                 tmp |= masked;
                 masked = (masked << shift) & mask;
@@ -133,7 +133,7 @@ impl BitBoard {
         .iter()
         {
             let mut tmp = 0;
-            let mut masked = (p >> shift) & mask;
+            let mut masked = (position >> shift) & mask;
             while masked != 0 && (masked & opp) != 0 {
                 tmp |= masked;
                 masked = (masked >> shift) & mask;
@@ -144,44 +144,25 @@ impl BitBoard {
         }
         match side {
             Side::Black => {
-                self.black ^= rev | p;
+                self.black ^= rev | position;
                 self.white ^= rev;
             }
             Side::White => {
                 self.black ^= rev;
-                self.white ^= rev | p;
+                self.white ^= rev | position;
             }
         }
     }
 
-    pub fn list_candidates(&self, side: Side) -> Vec<u8> {
-        let p = match side {
+    pub fn candidates(&self, side: Side) -> Candidate {
+        let pos = match side {
             Side::Black => can_put(self.black, self.white),
             Side::White => can_put(self.white, self.black),
         };
-        let mut v = Vec::with_capacity(p.count_ones() as usize);
-
-        const L2: u8 = 16;
-        let mut i = 0;
-        let mut mask_1 = 0x8000000000000000;
-        let mut mask_2 = 0xFFFF000000000000;
-        while i < 64 {
-            if p & mask_2 == 0 {
-                i += L2;
-                mask_1 >>= L2;
-                mask_2 >>= L2;
-            } else {
-                for _ in 0..L2 {
-                    if p & mask_1 != 0 {
-                        v.push(i);
-                    }
-                    i += 1;
-                    mask_1 >>= 1;
-                }
-                mask_2 >>= L2;
-            }
+        Candidate {
+            pos,
+            mask: 0x8000000000000000,
         }
-        v
     }
 
     pub fn count(&self) -> (Count, Count) {
@@ -191,12 +172,41 @@ impl BitBoard {
         )
     }
 
-    pub fn col_row(position: u8) -> (usize, usize) {
-        (position as usize % 8, position as usize / 8)
+    pub fn col_row(position: Position) -> (usize, usize) {
+        let position = position.leading_zeros() as usize;
+        (position % 8, position / 8)
     }
 
-    pub fn position(col: usize, row: usize) -> u8 {
-        (row * 8 + col) as u8
+    pub fn position(col: usize, row: usize) -> Position {
+        0x8000000000000000 >> (row * 8 + col)
+    }
+}
+
+#[derive(Debug)]
+pub struct Candidate {
+    pos: u64,
+    mask: u64,
+}
+
+impl Iterator for Candidate {
+    type Item = u64;
+    fn next(&mut self) -> Option<u64> {
+        while self.pos & self.mask != self.mask {
+            self.mask >>= 1;
+        }
+        if self.mask == 0 {
+            None
+        } else {
+            let mask = self.mask;
+            self.mask >>= 1;
+            self.pos -= mask; // for size_hint
+            Some(mask)
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let c = self.pos.count_ones() as usize;
+        (c, Some(c))
     }
 }
 

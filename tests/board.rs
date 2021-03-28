@@ -52,7 +52,7 @@ where
             _ => panic!("candidates [BW]"),
         };
         expect.sort();
-        let mut actual = board.list_candidates(side);
+        let mut actual = board.candidates(side).collect::<Vec<_>>();
         actual.sort();
         assert_eq!(expect, actual);
     }
