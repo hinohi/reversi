@@ -100,12 +100,17 @@ fn can_put(mine: u64, opp: u64) -> u64 {
 }
 
 impl BitBoard {
-    pub fn put(&mut self, side: Side, position: Position) {
-        let mut rev = 0;
-        let (mine, opp) = match side {
+    #[inline]
+    pub fn mine_opp_keys(&self, side: Side) -> (u64, u64) {
+        match side {
             Side::Black => (self.black, self.white),
             Side::White => (self.white, self.black),
-        };
+        }
+    }
+
+    pub fn put(&mut self, side: Side, position: Position) {
+        let mut rev = 0;
+        let (mine, opp) = self.mine_opp_keys(side);
         for &(shift, mask) in [
             (1, 0xfefefefefefefefe), // 左
             (7, 0x7f7f7f7f7f7f7f00), // 右上
@@ -154,14 +159,14 @@ impl BitBoard {
         }
     }
 
+    #[inline]
     pub fn candidates(&self, side: Side) -> Candidate {
-        let pos = match side {
-            Side::Black => can_put(self.black, self.white),
-            Side::White => can_put(self.white, self.black),
-        };
+        let (mine, opp) = self.mine_opp_keys(side);
+        let pos = can_put(mine, opp);
         Candidate { pos }
     }
 
+    #[inline]
     pub fn count(&self) -> (Count, Count) {
         (
             self.black.count_ones() as Count,
