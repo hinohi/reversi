@@ -20,6 +20,7 @@ impl<R: Rng> Search for RandomSearch<R> {
         _board: &BitBoard,
         _occupied: Occupied,
         candidates: &mut Candidate,
+        _last_passed: bool,
     ) -> Position {
         let i = self.rng.gen_range(0..candidates.size_hint().0);
         candidates.nth(i).unwrap()
@@ -49,12 +50,13 @@ impl<R: Rng> Search for RandomFullSearch<R> {
         board: &BitBoard,
         occupied: Occupied,
         candidates: &mut Candidate,
+        last_passed: bool,
     ) -> Position {
         if occupied < self.full_search_threshold {
             let i = self.rng.gen_range(0..candidates.size_hint().0);
             candidates.nth(i).unwrap()
         } else {
-            search_exact_with_candidates(board, self.side, candidates).0
+            search_exact_with_candidates(board, self.side, candidates, last_passed).0
         }
     }
 }

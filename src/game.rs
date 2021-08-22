@@ -64,17 +64,23 @@ where
         }
         let (side, col, row) = match self.side {
             Side::Black => {
-                let position =
-                    self.black_searcher
-                        .search(&self.board, self.occupied, &mut candidates);
+                let position = self.black_searcher.search(
+                    &self.board,
+                    self.occupied,
+                    &mut candidates,
+                    self.last_passed,
+                );
                 self.board.put(self.side, position);
                 let (col, row) = BitBoard::col_row(position);
                 (Side::Black, col, row)
             }
             Side::White => {
-                let position =
-                    self.white_searcher
-                        .search(&self.board, self.occupied, &mut candidates);
+                let position = self.white_searcher.search(
+                    &self.board,
+                    self.occupied,
+                    &mut candidates,
+                    self.last_passed,
+                );
                 self.board.put(self.side, position);
                 let (col, row) = BitBoard::col_row(position);
                 (Side::White, col, row)

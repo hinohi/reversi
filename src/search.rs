@@ -1,7 +1,7 @@
 mod random;
 
+pub use self::random::*;
 use crate::{BitBoard, Candidate, Count, Position, Side, SIZE};
-pub use random::*;
 
 pub type Occupied = u8;
 
@@ -11,6 +11,7 @@ pub trait Search {
         board: &BitBoard,
         occupied: Occupied,
         candidates: &mut Candidate,
+        last_passed: bool,
     ) -> Position;
 }
 
@@ -78,21 +79,30 @@ impl Score for CountTurn {
     }
 }
 
-pub fn search_exact(board: &BitBoard, side: Side) -> CountTurn {
-    exact_inner(board, side, false, 0, CountTurn::MIN, CountTurn::MAX)
+pub fn search_exact(board: &BitBoard, side: Side, last_passed: bool) -> CountTurn {
+    exact_inner(board, side, last_passed, 0, CountTurn::MIN, CountTurn::MAX)
 }
 
 pub fn search_exact_with_candidates(
     board: &BitBoard,
     side: Side,
     candidates: &mut Candidate,
+    last_passed: bool,
 ) -> (Position, CountTurn) {
     let mut alpha = CountTurn::MIN;
     let mut best = 0;
     for pos in candidates {
         let mut board = board.clone();
         board.put(side, pos);
-        let a = exact_inner(&board, side.flip(), false, 1, CountTurn::MIN, alpha.flip()).flip();
+        let a = exact_inner(
+            &board,
+            side.flip(),
+            last_passed,
+            1,
+            CountTurn::MIN,
+            alpha.flip(),
+        )
+        .flip();
         if a > alpha {
             alpha = a;
             best = pos;
