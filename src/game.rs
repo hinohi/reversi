@@ -51,8 +51,7 @@ where
             return self.game_set();
         }
         let mut candidates = self.board.candidates(self.side);
-        // これは暗黙の仕様すぎる気もする
-        if candidates.size_hint().0 == 0 {
+        if candidates.len() == 0 {
             return if self.last_passed {
                 self.game_set()
             } else {

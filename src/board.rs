@@ -208,6 +208,12 @@ impl Iterator for Candidate {
     }
 }
 
+impl ExactSizeIterator for Candidate {
+    fn len(&self) -> usize {
+        self.pos.count_ones() as usize
+    }
+}
+
 impl BitBoard {
     pub fn format<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
         let mut mask = 0x8000000000000000;
