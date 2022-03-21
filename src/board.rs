@@ -192,11 +192,10 @@ pub struct Candidate {
 impl Iterator for Candidate {
     type Item = u64;
     fn next(&mut self) -> Option<u64> {
-        let c = self.pos.leading_zeros();
-        if c == 64 {
+        if self.pos == 0 {
             None
         } else {
-            let p = 0x8000000000000000 >> c;
+            let p = 0x8000000000000000 >> self.pos.leading_zeros();
             self.pos -= p;
             Some(p)
         }

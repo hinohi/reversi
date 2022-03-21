@@ -120,7 +120,7 @@ fn exact_inner(
     beta: CountTurn,
 ) -> CountTurn {
     let candidates = board.candidates(side);
-    if candidates.size_hint().0 == 0 {
+    if candidates.len() == 0 {
         return if passed {
             let (black, white) = board.count();
             CountTurn::with_side(side, black, white, turn)
